@@ -2,27 +2,26 @@ import 'package:flutter/material.dart';
 
 class CategoryHeader extends StatelessWidget {
   final String title;
+  final Color backgroundColor;
 
-  const CategoryHeader({super.key, required this.title});
+  const CategoryHeader({
+    super.key,
+    required this.title,
+    required this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color:
-          title.toUpperCase() == 'PRODUCE'
-              ? Colors.green.shade100
-              : Colors.grey.shade300,
       width: double.infinity,
+      color: backgroundColor,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color:
-              title.toUpperCase() == 'PRODUCE'
-                  ? Colors.green.shade800
-                  : Colors.black54,
+        title,
+        style: const TextStyle(
+          fontSize: 20,
           fontWeight: FontWeight.bold,
-          fontSize: 14,
+          color: Colors.white,
         ),
       ),
     );

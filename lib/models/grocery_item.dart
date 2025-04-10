@@ -1,19 +1,28 @@
 class GroceryItem {
-  final String name;
-  final String category;
-  final double price;
-  bool isInCart;
+  String name;
+  String category;
+  double price;
+  bool isChecked;
   int quantity;
+  bool isInCart;
 
   GroceryItem({
     required this.name,
     required this.category,
-    this.price = 0.0,
-    this.isInCart = false,
+    required this.price,
+    this.isChecked = false,
     this.quantity = 1,
+    this.isInCart = false,
   });
 
-  // Optional: if you're using isChecked in UI logic, alias it
-  bool get isChecked => isInCart;
-  set isChecked(bool value) => isInCart = value;
+  // Override == and hashCode to prevent duplicates by name
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroceryItem &&
+          runtimeType == other.runtimeType &&
+          name.toLowerCase() == other.name.toLowerCase();
+
+  @override
+  int get hashCode => name.toLowerCase().hashCode;
 }

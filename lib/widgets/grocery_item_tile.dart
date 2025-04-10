@@ -3,11 +3,16 @@ import '../models/grocery_item.dart';
 
 class GroceryItemTile extends StatefulWidget {
   final GroceryItem item;
+  final ValueChanged<bool> onChanged;
+  final void Function(GroceryItem)? onEdit;
+  final void Function(GroceryItem)? onDelete;
 
   const GroceryItemTile({
     super.key,
     required this.item,
-    required Null Function(dynamic val) onChanged,
+    required this.onChanged,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -17,7 +22,12 @@ class GroceryItemTile extends StatefulWidget {
 class _GroceryItemTileState extends State<GroceryItemTile> {
   @override
   Widget build(BuildContext context) {
-    return CheckboxListTile(
+    return ListTile(
+      leading: Checkbox(
+        value: widget.item.isChecked,
+        onChanged: (value) => widget.onChanged(value ?? false),
+        activeColor: Colors.teal,
+      ),
       title: Text(
         widget.item.name,
         style: TextStyle(
@@ -25,24 +35,29 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
               widget.item.isChecked
                   ? TextDecoration.lineThrough
                   : TextDecoration.none,
+          color: widget.item.isChecked ? Colors.grey : Colors.black,
+          fontStyle:
+              widget.item.isChecked ? FontStyle.italic : FontStyle.normal,
         ),
       ),
-      subtitle:
-          // ignore: unnecessary_null_comparison
-          widget.item.price != null
-              ? Text(
-                // ignore: unnecessary_null_comparison
-                '₹${widget.item.price.toStringAsFixed(2)}${widget.item.quantity != null ? ' • ${widget.item.quantity}' : ''}',
-              )
-              : null,
-      value: widget.item.isChecked,
-      onChanged: (value) {
-        setState(() {
-          widget.item.isChecked = value ?? false;
-        });
-      },
-      activeColor: Colors.teal,
-      controlAffinity: ListTileControlAffinity.leading,
+
+      subtitle: Text(
+        // ignore: unnecessary_null_comparison
+        '₹${widget.item.price.toStringAsFixed(2)}${widget.item.quantity != null ? ' • ${widget.item.quantity}' : ''}',
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.blue),
+            onPressed: () => widget.onEdit?.call(widget.item),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => widget.onDelete?.call(widget.item),
+          ),
+        ],
+      ),
     );
   }
 }

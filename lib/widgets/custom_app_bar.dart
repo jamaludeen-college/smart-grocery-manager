@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
   final TextEditingController controller;
-
   final void Function(String)? onSubmitted;
 
-  const CustomAppBar({super.key, required this.controller, this.onSubmitted});
+  final String selectedList;
+  final List<String> listOptions;
+  final ValueChanged<String?>? onListChanged;
+
+  const CustomAppBar({
+    super.key,
+    required this.controller,
+    this.onSubmitted,
+    required this.selectedList,
+    required this.listOptions,
+    required this.onListChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +24,7 @@ class CustomAppBar extends StatelessWidget {
       color: Colors.teal,
       child: Column(
         children: [
-          const SizedBox(height: 32), // for status bar
+          const SizedBox(height: 32), // Status bar space
           SizedBox(
             height: 48,
             child: Stack(
@@ -29,19 +39,38 @@ class CustomAppBar extends StatelessWidget {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: 'Grocery List',
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Grocery List',
-                            child: Text('Grocery List'),
-                          ),
-                        ],
-                        onChanged: (value) {},
-                        dropdownColor: Colors.white,
-                        style: const TextStyle(color: Colors.white),
+                        value: selectedList,
+                        items:
+                            listOptions
+                                .map(
+                                  (list) => DropdownMenuItem(
+                                    value: list,
+                                    child: Text(
+                                      list,
+                                      style: const TextStyle(
+                                        color:
+                                            Colors
+                                                .black, // 👈 Dropdown item color
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged:
+                            (String? value) => onListChanged?.call(value),
+                        dropdownColor:
+                            Colors.white, // 👈 Dropdown background color
                         icon: const Icon(
                           Icons.arrow_drop_down,
-                          color: Colors.white,
+                          color:
+                              Colors
+                                  .white, // 👈 Dropdown icon color (visible on teal)
+                        ),
+                        underline: Container(), // 👈 Remove default underline
+                        style: const TextStyle(
+                          color:
+                              Colors.white, // 👈 Selected value shown on teal
                         ),
                       ),
                     ),
