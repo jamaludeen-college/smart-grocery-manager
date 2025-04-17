@@ -1,13 +1,13 @@
 class GroceryItem {
-  String name;
-  final String id; // <-- add this
-  String category;
-  double price;
-  bool isChecked;
-  int quantity;
-  final String? unit; // <-- optional
-  final String? note; // <-- optional
-  bool isInCart;
+  final String id;
+  final String name;
+  final String category;
+  final double price;
+  final bool isChecked;
+  final int quantity;
+  final String? unit;
+  final String? note;
+  final bool isInCart;
 
   GroceryItem({
     required this.id,
@@ -21,7 +21,30 @@ class GroceryItem {
     this.isInCart = false,
   });
 
-  // Override == and hashCode to prevent duplicates by name
+  GroceryItem copyWith({
+    String? id,
+    String? name,
+    String? category,
+    double? price,
+    bool? isChecked,
+    int? quantity,
+    String? unit,
+    String? note,
+    bool? isInCart,
+  }) {
+    return GroceryItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      isChecked: isChecked ?? this.isChecked,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      note: note ?? this.note,
+      isInCart: isInCart ?? this.isInCart,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
