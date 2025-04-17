@@ -27,7 +27,7 @@ class _NewOrEditItemScreenState extends State<NewOrEditItemScreen> {
     super.initState();
     final item = widget.item;
     _nameController = TextEditingController(text: item?.name ?? '');
- _quantityController = TextEditingController(
+    _quantityController = TextEditingController(
       text: item?.quantity.toString() ?? '',
     );
 
@@ -46,15 +46,14 @@ class _NewOrEditItemScreenState extends State<NewOrEditItemScreen> {
         id: widget.item?.id ?? UniqueKey().toString(),
         name: _nameController.text.trim(),
         quantity: int.tryParse(_quantityController.text.trim()) ?? 1,
-
         price: double.tryParse(_priceController.text) ?? 0.0,
         unit: _unit,
         note: _noteController.text.trim(),
         category: _category,
         isInCart: _isInCart,
       );
-      widget.onSave(item);
-      Navigator.pop(context);
+      widget.onSave(item); // This already pops the screen
+      // Don't call Navigator.pop again here
     }
   }
 
