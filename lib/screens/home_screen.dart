@@ -102,17 +102,26 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
+    if (!mounted) return;
+
     if (updatedItem != null) {
       setState(() {
-        final list = _itemsByList[selectedList]!;
-        final index = list.indexWhere((i) => i.id == updatedItem.id);
+        final selectedItems = _itemsByList[selectedList]!;
+        final index = selectedItems.indexWhere((i) => i.id == updatedItem.id);
         if (index != -1) {
-          list[index] = updatedItem;
+          selectedItems[index] = updatedItem;
         }
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('"${updatedItem.name}" updated!'),
+          backgroundColor: Colors.blue,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
-
 
   void _deleteItem(GroceryItem item) {
     setState(() {
@@ -128,13 +137,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final items = _itemsByList[selectedList]!;
     final List<GroceryItem> filteredItems = List.from(items);
-
 
     return Column(
       children: [
@@ -151,12 +157,16 @@ class _HomeScreenState extends State<HomeScreen> {
             onEdit: _editItem,
             onDelete: _deleteItem,
             onItemChecked: (item, value) {
-              setState(() {
-                item.isInCart = value;
-              });
+              final selectedItems = _itemsByList[selectedList]!;
+              final index = selectedItems.indexWhere((i) => i.id == item.id);
+              if (index != -1) {
+                setState(() {
+                  selectedItems[index] = item.copyWith(isChecked: value);
+                });
+              }
             },
-          ),
 
+          ),
         ),
 
         CartSummaryFooter(items: items),
