@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smg/screens/new_item_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/pantry_screen.dart';
 import 'screens/todo_screen.dart';
@@ -37,7 +36,6 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     PantryScreen(),
     TodoScreen(),
-    NewItemScreen(),
     SettingsScreen(),
   ];
 
