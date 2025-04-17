@@ -26,9 +26,12 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
       onLongPress: () => widget.onEdit?.call(widget.item), // <- Add this
       leading: Checkbox(
         value: widget.item.isChecked,
-        onChanged: (value) => widget.onChanged(value ?? false),
+        onChanged: (value) {
+          widget.onChanged(value ?? false);
+        },
         activeColor: Colors.teal,
       ),
+
       title: Text(
         widget.item.name,
         style: TextStyle(
