@@ -1,17 +1,23 @@
 class GroceryItem {
   String name;
+  final String id; // <-- add this
   String category;
   double price;
   bool isChecked;
   int quantity;
+  final String? unit; // <-- optional
+  final String? note; // <-- optional
   bool isInCart;
 
   GroceryItem({
+    required this.id,
     required this.name,
     required this.category,
     required this.price,
     this.isChecked = false,
     this.quantity = 1,
+    this.unit,
+    this.note,
     this.isInCart = false,
   });
 

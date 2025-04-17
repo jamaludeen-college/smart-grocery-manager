@@ -1,5 +1,6 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:smg/screens/edit_items_screen.dart';
 import 'package:smg/utils/item_category_helper.dart';
 import 'package:smg/widgets/custom_app_bar.dart';
 import 'package:smg/widgets/grocery_list_view.dart';
@@ -70,12 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       selectedItems.add(
         GroceryItem(
+          id: UniqueKey().toString(),
           name: name,
           category: ItemCategoryHelper.getCategory(name),
-          // ✅ Auto-categorized here
           price: defaultPrice,
         ),
       );
+
       _itemController.clear();
     });
 
@@ -88,42 +90,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _editItem(GroceryItem item) {
-    final TextEditingController editController = TextEditingController(
-      text: item.name,
+  void _editItem(GroceryItem item) async {
+    final updatedItem = await Navigator.push<GroceryItem>(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => NewOrEditItemScreen(
+              item: item,
+              onSave: (newItem) => Navigator.pop(context, newItem),
+            ),
+      ),
     );
 
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Edit Item'),
-            content: TextField(
-              controller: editController,
-              decoration: const InputDecoration(hintText: 'Enter new name'),
-              autofocus: true,
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () => Navigator.pop(context),
-              ),
-              ElevatedButton(
-                child: const Text('Save'),
-                onPressed: () {
-                  final newName = editController.text.trim();
-                  if (newName.isNotEmpty) {
-                    setState(() {
-                      item.name = newName;
-                    });
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-            ],
-          ),
-    );
+    if (updatedItem != null) {
+      setState(() {
+        final list = _itemsByList[selectedList]!;
+        final index = list.indexWhere((i) => i.id == updatedItem.id);
+        if (index != -1) {
+          list[index] = updatedItem;
+        }
+      });
+    }
   }
+
 
   void _deleteItem(GroceryItem item) {
     setState(() {

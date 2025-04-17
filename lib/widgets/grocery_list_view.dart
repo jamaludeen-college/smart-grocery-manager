@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smg/models/grocery_item.dart';
 import 'package:smg/widgets/category_header.dart';
 import 'package:smg/utils/item_category_helper.dart';
+import 'package:smg/widgets/grocery_item_tile.dart';
 
 class GroceryListView extends StatelessWidget {
   final List<GroceryItem> items;
@@ -42,43 +43,14 @@ class GroceryListView extends StatelessWidget {
                   backgroundColor: categoryColor,
                 ),
                 ...categoryItems.map(
-                  (item) => ListTile(
-                    leading: Checkbox(
-                      value: item.isInCart,
-                      onChanged: (value) {
-                        if (value != null) {
-                          onItemChecked(item, value);
-                        }
-                      },
-                    ),
-                    title: Text(
-                      item.name,
-                      style: TextStyle(
-                        decoration:
-                            item.isInCart
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                      ),
-                    ),
-
-                    subtitle: Text(
-                      '₹${item.price.toStringAsFixed(2)} • ${item.quantity}',
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => onEdit(item),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => onDelete(item),
-                        ),
-                      ],
-                    ),
+                  (item) => GroceryItemTile(
+                    item: item,
+                    onChanged: (checked) => onItemChecked(item, checked),
+                    onEdit: onEdit,
+                    onDelete: onDelete,
                   ),
                 ),
+
               ],
             );
           }).toList(),

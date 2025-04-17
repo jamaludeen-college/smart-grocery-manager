@@ -23,6 +23,7 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onLongPress: () => widget.onEdit?.call(widget.item), // <- Add this
       leading: Checkbox(
         value: widget.item.isChecked,
         onChanged: (value) => widget.onChanged(value ?? false),

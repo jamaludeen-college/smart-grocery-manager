@@ -7,7 +7,7 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Text('Settings Screen updted', style: TextStyle(fontSize: 20)),
+        child: Text('Settings Screen', style: TextStyle(fontSize: 20)),
       ),
     );
   }
