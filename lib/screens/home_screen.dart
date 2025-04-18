@@ -6,6 +6,7 @@ import 'package:smg/widgets/custom_app_bar.dart';
 import 'package:smg/widgets/grocery_list_view.dart';
 import 'package:smg/widgets/cart_summary_footer.dart';
 import 'package:smg/models/grocery_item.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +16,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+ late stt.SpeechToText _speech = stt.SpeechToText();
+
+
+@override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+@override
+  void dispose() {
+    _speech.stop();
+    _itemController.dispose();
+    super.dispose();
+  }
+
+  bool _isListening = false;
   final TextEditingController _itemController = TextEditingController();
   final List<String> listOptions = [
     'Grocery List',
@@ -43,6 +61,49 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+  void _startListening() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (status) => print('Speech status: $status'),
+        onError: (error) {
+          print('Speech error: ${error.errorMsg}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Mic permission denied or not available.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        },
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+
+        _speech.listen(
+          onResult: (result) {
+            setState(() {
+              _itemController.text = result.recognizedWords;
+            });
+
+            if (result.finalResult && result.recognizedWords.isNotEmpty) {
+              final rawItems = result.recognizedWords.split(',');
+              for (final item in rawItems) {
+                _addItem(item.trim());
+              }
+
+              _speech.stop();
+              setState(() => _isListening = false);
+            }
+          },
+        );
+      }
+    } else {
+      _speech.stop();
+      setState(() => _isListening = false);
+    }
+  }
+
 
   void _addItem(String name) {
     if (name.trim().isEmpty) return;
@@ -150,6 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
           selectedList: selectedList,
           listOptions: listOptions,
           onListChanged: _onListChanged,
+          onMicPressed: _startListening,
+          isListening: _isListening,
         ),
         Expanded(
           child: GroceryListView(
