@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget {
   final TextEditingController controller;
   final void Function(String)? onSubmitted;
+   final FocusNode focusNode;
+  
 
   final String selectedList;
   final List<String> listOptions;
@@ -12,6 +14,7 @@ class CustomAppBar extends StatelessWidget {
 
   const CustomAppBar({
     super.key,
+     required this.focusNode,
     required this.controller,
     this.onSubmitted,
     required this.selectedList,
@@ -101,6 +104,7 @@ class CustomAppBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: TextField(
+              focusNode: focusNode,
               controller: controller,
               onSubmitted: onSubmitted,
               decoration: InputDecoration(

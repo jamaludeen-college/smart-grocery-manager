@@ -23,7 +23,11 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onLongPress: () => widget.onEdit?.call(widget.item), // <- Add this
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 8,
+      ), // Tighter horizontal padding
+      dense: true, // Reduces vertical height
+      onLongPress: () => widget.onEdit?.call(widget.item),
       leading: Checkbox(
         value: widget.item.isChecked,
         onChanged: (value) {
@@ -31,36 +35,20 @@ class _GroceryItemTileState extends State<GroceryItemTile> {
         },
         activeColor: Colors.teal,
       ),
-
       title: Text(
         widget.item.name,
         style: TextStyle(
-          decoration:
-              widget.item.isChecked
-                  ? TextDecoration.lineThrough
-                  : TextDecoration.none,
+          decoration: widget.item.isChecked ? TextDecoration.lineThrough : null,
           color: widget.item.isChecked ? Colors.grey : Colors.black,
-          fontStyle:
-              widget.item.isChecked ? FontStyle.italic : FontStyle.normal,
+          fontStyle: widget.item.isChecked ? FontStyle.italic : null,
         ),
       ),
-
       subtitle: Text(
-        // ignore: unnecessary_null_comparison
-        '₹${widget.item.price.toStringAsFixed(2)}${widget.item.quantity != null ? ' • ${widget.item.quantity}' : ''}',
+        '₹${widget.item.price.toStringAsFixed(2)} • ${widget.item.quantity}',
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
-            onPressed: () => widget.onEdit?.call(widget.item),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () => widget.onDelete?.call(widget.item),
-          ),
-        ],
+      trailing: IconButton(
+        icon: const Icon(Icons.delete, color: Colors.red),
+        onPressed: () => widget.onDelete?.call(widget.item),
       ),
     );
   }

@@ -29,6 +29,10 @@ class GroceryListView extends StatelessWidget {
     }
 
     return ListView(
+      padding: const EdgeInsets.symmetric(
+        vertical: 8,
+        horizontal: 8,
+      ), // Added padding
       children:
           groupedItems.entries.map((entry) {
             final category = entry.key;
@@ -38,22 +42,29 @@ class GroceryListView extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 8), // Top space for each category block
                 CategoryHeader(
                   title: category.toUpperCase(),
                   backgroundColor: categoryColor,
                 ),
+                const SizedBox(height: 4), // Space between header and items
                 ...categoryItems.map(
-                  (item) => GroceryItemTile(
-                    item: item,
-                    onChanged: (checked) => onItemChecked(item, checked),
-                    onEdit: onEdit,
-                    onDelete: onDelete,
+                  (item) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 2,
+                    ), // Small space between items
+                    child: GroceryItemTile(
+                      item: item,
+                      onChanged: (checked) => onItemChecked(item, checked),
+                      onEdit: onEdit,
+                      onDelete: onDelete,
+                    ),
                   ),
                 ),
-
               ],
             );
           }).toList(),
     );
+
   }
 }
