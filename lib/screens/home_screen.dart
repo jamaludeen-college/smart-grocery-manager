@@ -1,12 +1,10 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:smg/screens/edit_items_screen.dart';
-import 'package:smg/utils/item_category_helper.dart';
-import 'package:smg/widgets/custom_app_bar.dart';
-import 'package:smg/widgets/grocery_list_view.dart';
-import 'package:smg/widgets/cart_summary_footer.dart';
 import 'package:smg/models/grocery_item.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:smg/screens/edit_items_screen.dart';
+import 'package:smg/widgets/home_content.dart';
+import 'package:smg/utils/item_category_helper.dart';
+import 'package:smg/widgets/voice_input_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,26 +14,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late stt.SpeechToText _speech = stt.SpeechToText();
-
-  @override
-  void initState() {
-    super.initState();
-    _speech = stt.SpeechToText();
-  }
-
-  final FocusNode _focusNode = FocusNode(); // Add this
-
-  @override
-  void dispose() {
-    _focusNode.dispose(); // Clean up
-    _itemController.dispose();
-    super.dispose();
-  }
-
-
-  bool _isListening = false;
+  final FocusNode _focusNode = FocusNode();
   final TextEditingController _itemController = TextEditingController();
+  bool _isListening = false;
+  final VoiceInputHandler _voiceHandler = VoiceInputHandler();
+
+
   final List<String> listOptions = [
     'Grocery List',
     'Fruits',
@@ -56,6 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
     'Beverages': [],
   };
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _itemController.dispose();
+    super.dispose();
+  }
+
   void _onListChanged(String? newList) {
     if (newList != null) {
       setState(() {
@@ -64,71 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _startListening() async {
-    _focusNode.requestFocus();
-    if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (status) => debugPrint('Speech status: $status'),
-        onError: (error) {
-          debugPrint('Speech error: ${error.errorMsg}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Mic permission denied or not available.'),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
-        },
-      );
-
-      if (available) {
-        setState(() => _isListening = true);
-
-        _speech.listen(
-          onResult: (result) {
-            if (result.finalResult && result.recognizedWords.isNotEmpty) {
-              setState(() => _isListening = false);
-              _speech.stop();
-
-              final rawText = result.recognizedWords.trim();
-              final List<String> items =
-                  rawText
-                      .toLowerCase()
-                      .replaceAll(
-                        RegExp(r'\band then\b|\bplus\b|\bwith\b|\band\b'),
-                        ',',
-                      ) // smart replace
-                      .split(',')
-                      .map((e) => e.trim())
-                      .where((e) => e.isNotEmpty)
-                      .toList();
-
-              for (final item in items) {
-                _addItem(
-                  item,
-                ); // auto-category logic already inside `_addItem()`
-              }
-            } else {
-              setState(() {
-                _itemController.text = result.recognizedWords;
-              });
-            }
-          },
-        );
-      }
-    } else {
-      _speech.stop();
-      setState(() => _isListening = false);
-    }
-  }
-
   void _addItem(String name) {
     if (name.trim().isEmpty) return;
 
     final lower = name.toLowerCase();
-    final defaultPrice = 10.0;
-
     final selectedItems = _itemsByList[selectedList]!;
-
     final isDuplicate = selectedItems.any(
       (item) => item.name.toLowerCase() == lower,
     );
@@ -151,10 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
           id: UniqueKey().toString(),
           name: name,
           category: ItemCategoryHelper.getCategory(name),
-          price: defaultPrice,
+          price: 10.0,
         ),
       );
-
       _itemController.clear();
     });
 
@@ -214,46 +144,62 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onItemChecked(GroceryItem item, bool value) {
+    final selectedItems = _itemsByList[selectedList]!;
+    final index = selectedItems.indexWhere((i) => i.id == item.id);
+    if (index != -1) {
+      setState(() {
+        selectedItems[index] = item.copyWith(isChecked: value, isInCart: value);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = _itemsByList[selectedList]!;
-    final List<GroceryItem> filteredItems = List.from(items);
 
-    return Column(
-      children: [
-        CustomAppBar(
-          controller: _itemController,
-          onSubmitted: _addItem,
-          selectedList: selectedList,
-          listOptions: listOptions,
-          onListChanged: _onListChanged,
-          onMicPressed: _startListening,
-          isListening: _isListening,
-          focusNode: _focusNode,
-        ),
-        Expanded(
-          child: GroceryListView(
-            items: filteredItems,
-            onEdit: _editItem,
-            onDelete: _deleteItem,
-            onItemChecked: (item, value) {
-              final selectedItems = _itemsByList[selectedList]!;
-              final index = selectedItems.indexWhere((i) => i.id == item.id);
-              if (index != -1) {
-                setState(() {
-                  selectedItems[index] = item.copyWith(
-                    isChecked: value,
-                    isInCart:
-                        value, // ← this ensures it's also added/removed from cart
-                  );
-                });
-              }
-            },
-          ),
-        ),
+    return HomeContent(
+      items: items,
+      onSubmitted: _addItem,
+      controller: _itemController,
+      selectedList: selectedList,
+      listOptions: listOptions,
+      onListChanged: _onListChanged,
+      onMicPressed: () {
+        _voiceHandler.startListening(
+          onWordsRecognized: (items) {
+            for (final item in items) {
+              _addItem(item);
+            }
+          },
+          onError: (msg) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(msg), backgroundColor: Colors.red),
+            );
+          },
+          onListeningStart:
+              () => setState(() {
+                _isListening = true;
+              }),
+          onListeningStop:
+              () => setState(() {
+                _isListening = false;
+              }),
+          onPartialText: (partial) {
+            _focusNode.requestFocus(); // Ensure keyboard input is enabled too
+            setState(() {
+              _itemController.text = partial;
+            });
+          },
+        );
+      },
 
-        CartSummaryFooter(items: items),
-      ],
+      // Placeholder for voice input integration
+      isListening: _isListening,
+      focusNode: _focusNode,
+      onEdit: _editItem,
+      onDelete: _deleteItem,
+      onItemChecked: _onItemChecked,
     );
   }
 }
