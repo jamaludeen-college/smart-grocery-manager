@@ -7,6 +7,8 @@ class CustomAppBar extends StatelessWidget {
   final String selectedList;
   final List<String> listOptions;
   final ValueChanged<String?>? onListChanged;
+  final VoidCallback? onMicPressed;
+  final bool isListening;
 
   const CustomAppBar({
     super.key,
@@ -15,6 +17,8 @@ class CustomAppBar extends StatelessWidget {
     required this.selectedList,
     required this.listOptions,
     required this.onListChanged,
+    this.onMicPressed,
+    required this.isListening,
   });
 
   @override
@@ -106,15 +110,27 @@ class CustomAppBar extends StatelessWidget {
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.history),
-                    SizedBox(width: 8),
-                    Icon(Icons.mic),
-                    SizedBox(width: 8),
-                    Icon(Icons.qr_code),
-                    SizedBox(width: 8),
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.history),
+                      onPressed: () {}, // You can hook this later if needed
+                    ),
+                    IconButton(
+                      onPressed: onMicPressed,
+                      icon: Icon(
+                        isListening ? Icons.mic : Icons.mic_none,
+                        color: isListening ? Colors.red : Colors.grey,
+                      ),
+                    ),
+
+                    IconButton(
+                      icon: const Icon(Icons.qr_code),
+                      onPressed: () {}, // Optional
+                    ),
+                    const SizedBox(width: 8),
                   ],
                 ),
+
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
