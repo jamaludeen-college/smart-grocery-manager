@@ -161,11 +161,14 @@ class _HomeScreenState extends State<HomeScreen> {
               final index = selectedItems.indexWhere((i) => i.id == item.id);
               if (index != -1) {
                 setState(() {
-                  selectedItems[index] = item.copyWith(isChecked: value);
+                  selectedItems[index] = item.copyWith(
+                    isChecked: value,
+                    isInCart:
+                        value, // ← this ensures it's also added/removed from cart
+                  );
                 });
               }
             },
-
           ),
         ),
 
