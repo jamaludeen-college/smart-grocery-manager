@@ -155,4 +155,21 @@ class ItemCategoryHelper {
         return Colors.grey.shade600;
     }
   }
+  
+  static final Map<String, String> _categoryEmoji = {
+    'Dairy': '🧀',
+    'Produce': '🥦',
+    'Grains': '🍞',
+    'Meat': '🍗',
+    'Snacks': '🍪',
+    'Beverages': '🍹',
+    'Spices': '🌶️',
+    'Personal Care': '🧼',
+    'Uncategorized': '📦',
+  };
+
+  static String getCategoryEmoji(String category) {
+    return _categoryEmoji[category] ?? '📦';
+  }
+
 }
