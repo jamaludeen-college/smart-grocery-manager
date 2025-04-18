@@ -16,21 +16,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
- late stt.SpeechToText _speech = stt.SpeechToText();
+  late stt.SpeechToText _speech = stt.SpeechToText();
 
-
-@override
+  @override
   void initState() {
     super.initState();
     _speech = stt.SpeechToText();
   }
 
-@override
+  final FocusNode _focusNode = FocusNode(); // Add this
+
+  @override
   void dispose() {
-    _speech.stop();
+    _focusNode.dispose(); // Clean up
     _itemController.dispose();
     super.dispose();
   }
+
 
   bool _isListening = false;
   final TextEditingController _itemController = TextEditingController();
@@ -63,11 +65,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _startListening() async {
+    _focusNode.requestFocus();
     if (!_isListening) {
       bool available = await _speech.initialize(
-        onStatus: (status) => print('Speech status: $status'),
+        onStatus: (status) => debugPrint('Speech status: $status'),
         onError: (error) {
-          print('Speech error: ${error.errorMsg}');
+          debugPrint('Speech error: ${error.errorMsg}');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Mic permission denied or not available.'),
@@ -82,18 +85,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
         _speech.listen(
           onResult: (result) {
-            setState(() {
-              _itemController.text = result.recognizedWords;
-            });
-
             if (result.finalResult && result.recognizedWords.isNotEmpty) {
-              final rawItems = result.recognizedWords.split(',');
-              for (final item in rawItems) {
-                _addItem(item.trim());
-              }
-
-              _speech.stop();
               setState(() => _isListening = false);
+              _speech.stop();
+
+              final rawText = result.recognizedWords.trim();
+              final List<String> items =
+                  rawText
+                      .toLowerCase()
+                      .replaceAll(
+                        RegExp(r'\band then\b|\bplus\b|\bwith\b|\band\b'),
+                        ',',
+                      ) // smart replace
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+
+              for (final item in items) {
+                _addItem(
+                  item,
+                ); // auto-category logic already inside `_addItem()`
+              }
+            } else {
+              setState(() {
+                _itemController.text = result.recognizedWords;
+              });
             }
           },
         );
@@ -103,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() => _isListening = false);
     }
   }
-
 
   void _addItem(String name) {
     if (name.trim().isEmpty) return;
@@ -213,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onListChanged: _onListChanged,
           onMicPressed: _startListening,
           isListening: _isListening,
+          focusNode: _focusNode,
         ),
         Expanded(
           child: GroceryListView(
