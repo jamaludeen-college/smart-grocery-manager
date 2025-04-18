@@ -29,30 +29,43 @@ class GroceryListView extends StatelessWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      padding: const EdgeInsets.all(8),
       children:
           groupedItems.entries.map((entry) {
             final category = entry.key;
             final categoryItems = entry.value;
-
-            // ✅ Sort: unchecked first, then checked
-            categoryItems.sort((a, b) {
-              if (a.isChecked == b.isChecked) return 0;
-              return a.isChecked ? 1 : -1; // unchecked first
-            });
-
             final categoryColor = ItemCategoryHelper.getCategoryColor(category);
+
+            // Divide into unchecked and checked
+            final unchecked =
+                categoryItems.where((item) => !item.isChecked).toList();
+            final checked =
+                categoryItems.where((item) => item.isChecked).toList();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8),
                 CategoryHeader(
-                  title: category.toUpperCase(),
+                  title:
+                      '${ItemCategoryHelper.getCategoryEmoji(category)} ${category.toUpperCase()}',
                   backgroundColor: categoryColor,
                 ),
                 const SizedBox(height: 4),
-                ...categoryItems.map(
+                ...unchecked.map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: GroceryItemTile(
+                      item: item,
+                      onChanged: (checked) => onItemChecked(item, checked),
+                      onEdit: onEdit,
+                      onDelete: onDelete,
+                    ),
+                  ),
+                ),
+                if (unchecked.isNotEmpty && checked.isNotEmpty)
+                  const Divider(height: 16, thickness: 1, color: Colors.grey),
+                ...checked.map(
                   (item) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: GroceryItemTile(
@@ -68,5 +81,4 @@ class GroceryListView extends StatelessWidget {
           }).toList(),
     );
   }
-
 }
