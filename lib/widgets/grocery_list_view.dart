@@ -29,30 +29,32 @@ class GroceryListView extends StatelessWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: 8,
-      ), // Added padding
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       children:
           groupedItems.entries.map((entry) {
             final category = entry.key;
             final categoryItems = entry.value;
+
+            // ✅ Sort: unchecked first, then checked
+            categoryItems.sort((a, b) {
+              if (a.isChecked == b.isChecked) return 0;
+              return a.isChecked ? 1 : -1; // unchecked first
+            });
+
             final categoryColor = ItemCategoryHelper.getCategoryColor(category);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8), // Top space for each category block
+                const SizedBox(height: 8),
                 CategoryHeader(
                   title: category.toUpperCase(),
                   backgroundColor: categoryColor,
                 ),
-                const SizedBox(height: 4), // Space between header and items
+                const SizedBox(height: 4),
                 ...categoryItems.map(
                   (item) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 2,
-                    ), // Small space between items
+                    padding: const EdgeInsets.symmetric(vertical: 2),
                     child: GroceryItemTile(
                       item: item,
                       onChanged: (checked) => onItemChecked(item, checked),
@@ -65,6 +67,6 @@ class GroceryListView extends StatelessWidget {
             );
           }).toList(),
     );
-
   }
+
 }
