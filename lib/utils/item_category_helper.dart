@@ -8,6 +8,9 @@ class ItemCategoryHelper {
     'egg': 'Dairy',
     'cheese': 'Dairy',
     'yogurt': 'Dairy',
+    'paneer': 'Dairy',
+    'curd': 'Dairy',
+    'ghee': 'Dairy',
 
     // Produce
     'banana': 'Produce',
@@ -22,6 +25,13 @@ class ItemCategoryHelper {
     'tomato': 'Produce',
     'potato': 'Produce',
     'grapes': 'Produce',
+    'cucumber': 'Produce',
+    'lemon': 'Produce',
+    'mango': 'Produce',
+    'orange': 'Produce',
+    'beetroot': 'Produce',
+    'garlic': 'Produce',
+    'ginger': 'Produce',
 
     // Grains
     'bread': 'Grains',
@@ -31,6 +41,10 @@ class ItemCategoryHelper {
     'flour': 'Grains',
     'wheat': 'Grains',
     'cereal': 'Grains',
+    'noodles': 'Grains',
+    'cornflakes': 'Grains',
+    'semolina': 'Grains',
+    'barley': 'Grains',
 
     // Meat
     'chicken': 'Meat',
@@ -44,6 +58,9 @@ class ItemCategoryHelper {
     'biscuits': 'Snacks',
     'namkeen': 'Snacks',
     'chocolate': 'Snacks',
+    'popcorn': 'Snacks',
+    'samosa': 'Snacks',
+    'nachos': 'Snacks',
 
     // Beverages
     'juice': 'Beverages',
@@ -51,6 +68,9 @@ class ItemCategoryHelper {
     'coffee': 'Beverages',
     'tea': 'Beverages',
     'milkshake': 'Beverages',
+    'lassi': 'Beverages',
+    'smoothie': 'Beverages',
+    'energy drink': 'Beverages',
 
     // Spices
     'salt': 'Spices',
@@ -59,26 +79,46 @@ class ItemCategoryHelper {
     'turmeric': 'Spices',
     'masala': 'Spices',
     'spices': 'Spices',
+    'cumin': 'Spices',
+    'coriander': 'Spices',
+    'chilli powder': 'Spices',
+    'mustard seeds': 'Spices',
+    'asafoetida': 'Spices',
 
     // Personal Care
     'soap': 'Personal Care',
     'shampoo': 'Personal Care',
     'detergent': 'Personal Care',
     'toothpaste': 'Personal Care',
+    'toothbrush': 'Personal Care',
+    'lotion': 'Personal Care',
+    'face wash': 'Personal Care',
+    'sanitizer': 'Personal Care',
+    'razor': 'Personal Care',
+    'tissue': 'Personal Care',
   };
 
   static String normalize(String name) {
+    name = name.toLowerCase().trim();
+
+    // Remove plural suffixes
+    if (name.endsWith('es') &&
+        _categoryMap.containsKey(name.substring(0, name.length - 2))) {
+      return name.substring(0, name.length - 2);
+    }
+    if (name.endsWith('s') &&
+        _categoryMap.containsKey(name.substring(0, name.length - 1))) {
+      return name.substring(0, name.length - 1);
+    }
+
+    // Manual edge cases
     switch (name) {
-      case 'eggs':
-        return 'egg';
-      case 'tomatoes':
-        return 'tomato';
-      case 'potatoes':
-        return 'potato';
       case 'grape':
         return 'grapes';
       case 'mirchis':
         return 'mirchi';
+      case 'curds':
+        return 'curd';
       default:
         return name;
     }
@@ -88,6 +128,9 @@ class ItemCategoryHelper {
     itemName = normalize(itemName.toLowerCase());
     return _categoryMap[itemName] ?? 'Uncategorized';
   }
+
+  static List<String> get categories =>
+      _categoryMap.values.toSet().toList()..sort(); // Optional sorting
 
   static Color getCategoryColor(String category) {
     switch (category) {
@@ -112,19 +155,4 @@ class ItemCategoryHelper {
         return Colors.grey.shade600;
     }
   }
-
-  static List<String> get categories {
-    return [
-      'Dairy',
-      'Produce',
-      'Grains',
-      'Meat',
-      'Snacks',
-      'Beverages',
-      'Spices',
-      'Personal Care',
-      'Uncategorized',
-    ];
-  }
-
 }
